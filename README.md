@@ -69,7 +69,7 @@ The project consists of two main directories, `producers` and `consumers`.
 
 To run the simulation, you must first start up the Kafka ecosystem on the machine utilizing Docker Compose.
 
-```%> docker-compose up```
+```%> docker-compose up -d```
 
 Docker compose will take a 3-5 minutes to start, depending on your hardware. Please be patient and wait for the docker-compose logs to slow down or stop before beginning the simulation.
 
