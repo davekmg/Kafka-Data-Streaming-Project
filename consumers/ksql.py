@@ -13,27 +13,14 @@ logger = logging.getLogger(__name__)
 KSQL_URL = "http://localhost:8088"
 
 
-# Note: The table does not pull any data when the primary key is of type int. Therfore,
-# the station_id has used implicit type coercion by setting the type as VARCHAR
-# Note: The GROUP BY column does not appear in the topic VALUE but is set in the topic KEY. 
-# Note: The table turnstile_summary was created with the stream turnstile_stream instead of the table turnstile
-# becasue the current version of ksql, as per this writing, requires a primary key definition when creating a table. This primary key
-# is encoded in the table making it unreadable. The stream was used an alternative option because KEY definition is not mandatory.
+# Unlike previous versions of KSQLDB, this version requires tables to have a PRIMARY KEY column, and does not implicitly
+# create one if it is not defined. 
 KSQL_STATEMENT = """
 CREATE TABLE turnstile (
-    station_id VARCHAR PRIMARY KEY,
-    station_name VARCHAR,
-    line VARCHAR,
-    num_entries INT
-) WITH (KAFKA_TOPIC='org.chicago.cta.turnstiles',
-        VALUE_FORMAT='AVRO'
-);
-
-CREATE STREAM turnstile_stream (
+    ROWKEY VARCHAR PRIMARY KEY,
     station_id INT,
     station_name VARCHAR,
-    line VARCHAR,
-    num_entries INT
+    line VARCHAR
 ) WITH (KAFKA_TOPIC='org.chicago.cta.turnstiles',
         VALUE_FORMAT='AVRO'
 );
@@ -41,7 +28,7 @@ CREATE STREAM turnstile_stream (
 CREATE TABLE turnstile_summary
 WITH (VALUE_FORMAT='JSON', KEY_FORMAT='JSON') AS
     SELECT station_id, COUNT(station_id) as count
-    FROM turnstile_stream
+    FROM turnstile
     GROUP BY station_id;
 
 """
